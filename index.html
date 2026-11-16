@@ -1,0 +1,1136 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tutorial interativo — Cadastro de Disciplinas</title>
+<style>
+  :root{
+    --accent:#459ad6;
+    --accent-dark:#2e6da4;
+    --accent-soft:#e6f1fb;
+    --ink:#333333;
+    --muted:#777777;
+    --border:#dddddd;
+    --line:#e1e7ee;
+    --row:#eef6fd;
+    --row-alt:#e2efff;
+    --navy:#163b5c;
+    --ok:#1f9d6b;
+    --cols:64px minmax(0,1.6fr) minmax(0,1.2fr) minmax(0,1.2fr) minmax(0,0.9fr) minmax(0,0.9fr) minmax(0,0.9fr) 52px 52px;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  html,body{margin:0;min-height:100%}
+  body{background:#eef2f6;color:var(--ink);font-family:Arial,Verdana,sans-serif;font-size:13px}
+
+  /* header */
+  .gov-bar{display:flex;align-items:center;gap:18px;padding:10px 24px;background:#fff;border-bottom:1px solid #e3e8ee;flex-wrap:wrap}
+  .gov-bar .logo img{height:30px;display:block}
+  .gov-bar .user{margin-left:auto;text-align:right;line-height:1.35}
+  .gov-bar .user b{font-size:12px}
+  .gov-bar .user span{display:block;font-size:10.5px;color:var(--muted);letter-spacing:.03em}
+  .pills{display:flex;gap:6px;flex-wrap:wrap}
+  .pill{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 11px;border-radius:16px;background:#f4f7fa;border:1px solid #e3e8ee;color:#41505f;font-size:11.5px;text-decoration:none;white-space:nowrap}
+  .pill svg{width:13px;height:13px;fill:none;stroke:var(--accent-dark);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .pill:hover{background:var(--accent-soft);border-color:#cfe4f5}
+
+  /* layout */
+  .app-layout{display:flex;min-height:calc(100vh - 128px)}
+  .sidebar{width:236px;flex:0 0 236px;background:var(--navy);padding:12px 0 24px;color:#dbe9f5}
+  .side-item{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;font-size:12.5px;color:#cfe1f0;border-left:3px solid transparent;cursor:default}
+  .side-item:hover{background:rgba(255,255,255,.06)}
+  .side-item.group{color:#fff;font-weight:700;background:rgba(255,255,255,.05);border-left-color:var(--accent)}
+  .side-sub{padding:9px 18px 9px 28px;font-size:12px;color:#a9c6de;border-left:3px solid transparent;cursor:pointer}
+  .side-sub:hover{background:rgba(255,255,255,.06)}
+  .side-sub.active{background:rgba(69,154,214,.22);color:#fff;font-weight:700;border-left-color:var(--accent)}
+  .side-item.group{cursor:pointer}
+  .submenu-list{display:none}
+  .submenu-list.open{display:block}
+  .side-item .arrow{opacity:.5;font-size:14px}
+  .main{flex:1;min-width:0;padding:22px 26px 30px}
+  .page-title{margin:0 0 16px;font-family:Verdana,Arial,sans-serif;font-size:20px;color:#243447;font-weight:700}
+
+  /* cards */
+  .card{background:#fff;border:1px solid var(--border);border-radius:4px;margin-bottom:16px;overflow:hidden}
+  .card-toolbar{display:flex;justify-content:flex-end;padding:10px 14px;border-bottom:1px solid #f0f4f8}
+  .form-body{padding:4px 14px 2px}
+  .form-grid{display:grid;grid-template-columns:120px 1fr;gap:10px 12px;align-items:center;max-width:640px}
+  .form-label{color:#333;font-size:12.5px;margin:0}
+  .form-input{height:32px;border:1px solid #cccccc;border-radius:4px;padding:0 9px;font-family:inherit;font-size:12.5px;color:#333;background:#fff;max-width:260px;width:100%}
+  .form-input:disabled{background:#f2f2f2;color:#666;cursor:not-allowed}
+  .form-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px rgba(69,154,214,.18)}
+  .form-actions{display:flex;justify-content:flex-end;gap:8px;padding:10px 14px 14px}
+  .aviso{margin:0 14px 10px;padding:8px 11px;border-radius:4px;background:#fdf1e7;border:1px solid #f0d3b8;color:#8a4b18;font-size:12px}
+
+  /* buttons */
+  .btn{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 14px;border-radius:4px;border:1px solid var(--accent-dark);background:var(--accent);color:#fff;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;transition:background .15s}
+  .btn:hover{background:#3a88c0}
+  .btn svg{width:12px;height:12px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .btn-outline{background:#fff;color:var(--accent-dark);border:1px solid #cccccc;font-weight:400}
+  .btn-outline:hover{background:var(--accent-soft)}
+  .btn-danger{background:#fff;border-color:#e3c4c4;color:#a33;font-weight:400}
+  .btn-danger:hover{background:#fdf0f0}
+  .btn-link{background:none;border:none;color:var(--accent-dark);font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;padding:6px 2px;text-decoration:underline}
+
+  /* table */
+  .table-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid #f0f4f8}
+  .table-toolbar .spacer{flex:1}
+  .table-toolbar .mini{display:flex;align-items:center;gap:6px;font-size:11.5px;color:#555}
+  .table-toolbar .mini input{width:38px;height:26px;border:1px solid #ccc;border-radius:3px;text-align:center;font-size:11.5px}
+  .table-filter{display:flex;align-items:center;gap:6px;font-size:11.5px;color:#555}
+  .table-filter input{height:26px;width:150px;border:1px solid #ccc;border-radius:3px;padding:0 7px;font-size:11.5px}
+  .table-wrapper{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .table-header,.row{display:grid;grid-template-columns:var(--cols);min-width:880px}
+  .table-header{background:var(--accent-dark);color:#fff}
+  .table-header .cell{display:flex;align-items:center;justify-content:center;min-height:34px;padding:6px 6px;font-size:10.5px;font-weight:700;text-align:center;line-height:1.25;border-right:1px solid rgba(255,255,255,.16)}
+  .table-header .cell:last-child{border-right:none}
+  .table-body{background:#fff}
+  .row{border-bottom:1px solid #dfeaf5}
+  .row:nth-child(odd){background:var(--row)}
+  .row:nth-child(even){background:var(--row-alt)}
+  .cell-data{display:flex;align-items:center;justify-content:center;min-height:34px;padding:5px 7px;font-size:11.5px;color:#333;text-align:center;border-right:1px solid #e3eef8;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .cell-data:last-child{border-right:none}
+  .cell-data.name{font-weight:700;color:#2b3d50}
+  .cell-link{display:flex;align-items:center;justify-content:center;min-height:34px;border-right:1px solid #e3eef8}
+  .cell-link:last-child{border-right:none}
+  .cell-link button{background:none;border:none;padding:4px;cursor:pointer;display:flex;border-radius:3px}
+  .cell-link button:hover{background:rgba(51,122,183,.12)}
+  .cell-link svg{width:13px;height:13px;fill:none;stroke:#337ab7;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .empty{display:flex;align-items:center;justify-content:center;min-height:70px;padding:16px;color:#5a6b7c;font-size:12.5px;text-align:center}
+  .row.novo{animation:flash 1.6s ease}
+  @keyframes flash{0%{background:#fff7d6}100%{background:transparent}}
+  .table-footer{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-top:1px solid #f0f4f8;font-size:11px;color:#777;flex-wrap:wrap;gap:6px}
+  .pagination{display:flex;align-items:center;gap:8px}
+  .pagination a{color:var(--accent-dark);text-decoration:none}
+  .pagination .on{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;border-radius:3px;background:var(--accent-soft);color:var(--accent-dark);font-weight:700}
+
+  /* footer */
+  .gov-footer{display:flex;align-items:center;gap:14px;padding:12px 24px;background:#1f2d3d;color:#c9d6e3;font-size:11px;line-height:1.45}
+  .gov-footer img{height:34px}
+  .gov-footer b{color:#fff}
+
+  /* modal */
+  .modal-overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(10,20,35,.45);padding:18px;z-index:500}
+  .modal-overlay.open{display:flex}
+  .modal{width:min(680px,100%);background:#fff;border-radius:5px;overflow:hidden;box-shadow:0 24px 60px rgba(10,20,35,.35)}
+  .modal-header{background:var(--accent);color:#fff;font-family:Verdana,Arial,sans-serif;font-weight:700;font-size:13px;letter-spacing:.05em;padding:11px 16px}
+  .modal-body{padding:16px}
+  .modal fieldset{border:1px solid var(--border);border-radius:4px;padding:14px 16px 16px;margin:0}
+  .modal legend{font-size:11.5px;font-weight:700;color:#555;padding:0 6px}
+  .modal-grid{display:grid;grid-template-columns:170px minmax(0,1fr);gap:10px 14px;align-items:center}
+  .modal-label{font-size:12.5px;color:#333}
+  .modal-input{height:32px;border:1px solid #cccccc;border-radius:4px;padding:0 9px;font-family:inherit;font-size:12.5px;color:#333;width:100%;max-width:300px}
+  .modal-input:disabled{background:#eeeeee;color:#555;cursor:not-allowed}
+  .modal-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px rgba(69,154,214,.18)}
+  .modal-input.erro{border-color:#c0392b;box-shadow:0 0 0 2px rgba(192,57,43,.15)}
+  .modal-footer{display:flex;justify-content:flex-end;gap:8px;padding:12px 16px;border-top:1px solid #f0f4f8}
+  body.tour-on .btn-fechar{display:none!important}
+
+  /* views / home / matriz */
+  .home-card{max-width:660px;background:#fff;border:1px solid var(--border);border-radius:4px;padding:26px 28px}
+  .home-card p{margin:8px 0 0;font-size:12.8px;line-height:1.6;color:#45525f}
+  .home-card .hint{margin-top:14px;padding:10px 12px;border-radius:5px;background:var(--accent-soft);border:1px solid #cfe4f5;color:var(--accent-dark);font-size:11.8px;font-weight:700}
+  .matriz-wrap{overflow-x:auto}
+  .matriz{width:100%;border-collapse:collapse;min-width:1180px}
+  .matriz th{background:var(--accent-dark);color:#fff;font-size:10.5px;padding:9px 8px;text-align:center;border-right:1px solid rgba(255,255,255,.16);line-height:1.25}
+  .matriz td{padding:8px;border-top:1px solid #dfeaf5;background:var(--row);text-align:center;vertical-align:middle}
+  .matriz-select{height:30px;border:1px solid #cccccc;border-radius:4px;font-family:inherit;font-size:11.5px;color:#333;background:#fff;width:100%;max-width:240px}
+  .matriz-select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px rgba(69,154,214,.18)}
+  .matriz-aulas input{width:56px;height:28px;border:1px solid #cccccc;border-radius:4px;text-align:center;font-size:11.5px;margin:0 2px}
+  .matriz-plus{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--accent-soft);color:var(--accent-dark);font-weight:700;font-size:15px}
+  .matriz-foot{padding:9px 14px;font-size:11px;color:#777;border-top:1px solid #f0f4f8}
+  .matriz-input{width:46px;height:28px;border:1px solid #cccccc;border-radius:4px;text-align:center;font-size:11px}
+  .matriz-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px rgba(69,154,214,.18)}
+  .fund-filters{grid-template-columns:110px minmax(0,1fr) 120px minmax(0,1fr);max-width:100%}
+  #fund-table-header{grid-template-columns:minmax(0,.8fr) minmax(0,2.6fr) minmax(0,1fr) minmax(0,1.9fr) minmax(0,1.1fr) minmax(0,.9fr) minmax(0,.9fr) minmax(0,.6fr) minmax(0,.5fr) minmax(0,.7fr) minmax(0,.7fr) minmax(0,.55fr) minmax(0,.6fr);min-width:1100px}
+  #fund-tbody .fund-row{grid-template-columns:minmax(0,.8fr) minmax(0,2.6fr) minmax(0,1fr) minmax(0,1.9fr) minmax(0,1.1fr) minmax(0,.9fr) minmax(0,.9fr) minmax(0,.6fr) minmax(0,.5fr) minmax(0,.7fr) minmax(0,.7fr) minmax(0,.55fr) minmax(0,.6fr);min-width:1100px}
+  .status-pill{display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;background:#e8f6ef;color:#177a52;font-size:10.5px;font-weight:700;letter-spacing:.03em}
+  .modal-fund{width:min(1200px,100%);max-height:92vh;display:flex;flex-direction:column}
+  .modal-fund .modal-body{overflow:auto;padding:14px 16px}
+  .modal-fund .matriz td{background:#eef6fd}
+
+  /* tour */
+  .tour{position:fixed;inset:0;z-index:1000;pointer-events:none}
+  .tour::before{content:"";position:fixed;inset:0;background:rgba(10,20,35,.58);opacity:0;transition:opacity .2s;pointer-events:none}
+  .tour.center{pointer-events:auto}
+  .tour.center::before{opacity:1}
+  .spot{position:fixed;display:none;border-radius:8px;background:transparent;box-shadow:0 0 0 9999px rgba(10,20,35,.58);pointer-events:none;z-index:1;transition:top .22s ease,left .22s ease,width .22s ease,height .22s ease}
+  .ring{position:fixed;display:none;border:2px solid #8fd0f7;border-radius:10px;pointer-events:none;z-index:2;animation:pulse 1.8s ease-out infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(143,208,247,.55)}100%{box-shadow:0 0 0 14px rgba(143,208,247,0)}}
+  .coach{position:fixed;left:0;top:0;width:366px;max-width:calc(100vw - 24px);background:#fff;border:1px solid #dbe2e8;border-radius:12px;box-shadow:0 24px 60px rgba(8,22,40,.4);padding:16px 18px 14px;pointer-events:auto;z-index:3;transition:top .22s ease,left .22s ease}
+  .coach-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+  .coach-step{font:700 10.5px/1 Consolas,monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-dark)}
+  .tour-x{background:none;border:none;color:#7a8794;font-family:inherit;font-size:11.5px;cursor:pointer;padding:2px 0;text-decoration:underline}
+  .tour-x:hover{color:#333}
+  .pbar{height:4px;border-radius:3px;background:#e8eef4;overflow:hidden;margin-bottom:13px}
+  .pbar i{display:block;height:100%;width:0;background:var(--accent);border-radius:3px;transition:width .3s ease}
+  .coach h2{margin:0 0 7px;font-family:Verdana,Arial,sans-serif;font-size:16px;line-height:1.25;color:#1f2d3d}
+  .coach p{margin:0;font-size:12.8px;line-height:1.5;color:#45525f}
+  .coach .wait{margin-top:11px;padding:7px 10px;border-radius:5px;background:var(--accent-soft);border:1px solid #cfe4f5;color:var(--accent-dark);font-size:11.5px;font-weight:700}
+  .coach.is-done .wait{background:#eefaf3;border-color:#c9ecd9;color:#177a52}
+  .coach-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:13px}
+  .btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:34px;padding:0 18px;border:none;border-radius:6px;background:var(--accent);color:#fff;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;box-shadow:0 6px 14px rgba(69,154,214,.35)}
+  .btn-primary:hover{background:#3a88c0}
+  .coach .link{margin-left:auto}
+  .restart{position:fixed;right:18px;bottom:18px;z-index:900;display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 14px;border-radius:18px;border:1px solid #cfe4f5;background:#fff;color:var(--accent-dark);font-family:inherit;font-size:11.5px;font-weight:700;cursor:pointer;box-shadow:0 8px 22px rgba(20,40,70,.18)}
+  .restart:hover{background:var(--accent-soft)}
+
+  .menu-btn{display:none;align-items:center;justify-content:center;width:40px;height:40px;padding:0;border:1px solid #e3e8ee;border-radius:8px;background:#fff;cursor:pointer;flex:0 0 auto}
+  .menu-btn svg{width:20px;height:20px;fill:none;stroke:var(--accent-dark);stroke-width:2;stroke-linecap:round}
+  .drawer-bg{display:none;position:fixed;inset:0;background:rgba(10,20,35,.45);z-index:790}
+
+  @media (max-width:920px){
+    .menu-btn{display:inline-flex}
+    .sidebar{display:block;position:fixed;top:0;left:0;bottom:0;width:286px;max-width:84vw;z-index:800;transform:translateX(-100%);transition:transform .22s ease;overflow-y:auto;padding-top:16px}
+    .sidebar.open{transform:translateX(0)}
+    .drawer-bg.show{display:block}
+    .app-layout{min-height:auto}
+    .main{padding:14px}
+    .gov-bar{padding:10px 14px;gap:10px}
+    .gov-bar .user{margin-left:auto;text-align:right}
+    .page-title{font-size:18px}
+    .form-grid{grid-template-columns:1fr;max-width:100%}
+    .form-label{margin-top:4px;font-size:13.5px}
+    .form-input{max-width:100%;height:42px;font-size:14px}
+    .btn{height:42px;font-size:13.5px;padding:0 16px}
+    .btn-primary{height:42px;font-size:13.5px}
+    .modal-grid{grid-template-columns:1fr}
+    .modal-label{margin-top:6px;font-size:13.5px}
+    .modal-input{max-width:100%;height:42px;font-size:14px}
+    .modal{width:100%;max-height:94vh;overflow:auto}
+    .modal-footer .btn{flex:1;justify-content:center}
+    .side-item{padding:13px 18px;font-size:14px}
+    .side-sub{padding:13px 18px 13px 28px;font-size:13.5px}
+    .cell-data{font-size:12px;min-height:38px}
+    .table-header .cell{min-height:38px;font-size:10px}
+    .coach{max-height:72vh;overflow:auto}
+    .restart{right:12px;bottom:12px}
+  }
+  @media (max-width:600px){
+    .pills{display:none}
+    .gov-bar .user span{display:none}
+    .gov-bar{padding:8px 12px;gap:8px}
+    .main{padding:10px}
+    .card-toolbar{justify-content:stretch}
+    .card-toolbar .btn{width:100%}
+    .form-actions{flex-direction:column}
+    .form-actions .btn{width:100%}
+    .coach{padding:14px 15px 12px}
+    .coach h2{font-size:15px}
+    .coach p{font-size:13px}
+    .modal-fund{max-height:94vh}
+    .modal-fund .matriz{min-width:880px}
+    .modal-fund .matriz thead tr:first-child th:nth-child(1){width:150px!important}
+    .modal-fund .matriz thead tr:first-child th:nth-child(2){width:130px!important}
+    .modal-fund .matriz thead tr:first-child th:nth-child(3){width:100px!important}
+    .matriz-input{width:34px}
+    .matriz-select{font-size:11px}
+  }
+</style>
+</head>
+<body>
+
+<header class="gov-bar" data-od-id="gov-bar">
+  <button class="menu-btn" id="btn-menu" type="button" aria-label="Abrir menu" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+  <a class="logo" href="#" data-od-id="logo"><img src="figma/assets/a51c4358b554e6876fe81a1bdb5a91b41b9ad098.png" alt="Secretaria Escolar Digital" onerror="this.style.display='none'"></a>
+  <div class="user">
+    <b>Olá, ALINE DA SILVA AMORIM</b>
+    <span>SUCOR - COEGD - COGDP</span>
+  </div>
+  <nav class="pills" data-od-id="acoes-topo">
+    <a class="pill" href="#"><svg viewBox="0 0 24 24"><path d="M12 2 2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>Tutoriais</a>
+    <a class="pill" href="#"><svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21v-1c0-3 4-5 8-5s8 2 8 5v1"/></svg>Perfil</a>
+  </nav>
+</header>
+<div class="drawer-bg" id="drawer-bg"></div>
+
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar" data-od-id="sidebar">
+    <div class="side-item">Aluno<span class="arrow">›</span></div>
+    <div class="side-item">Centro de Mídias<span class="arrow">›</span></div>
+    <div class="side-item">Atribuição Online<span class="arrow">›</span></div>
+    <div class="side-item">Diário de Classe<span class="arrow">›</span></div>
+    <div class="side-item group" id="menu-municipios" data-od-id="menu-municipios">Municípios<span class="arrow">⌄</span></div>
+    <div class="submenu-list" id="submenu-municipios">
+      <div class="side-sub" id="menu-disciplinas" data-od-id="menu-disciplinas">Disciplinas - Municípios</div>
+      <div class="side-sub" id="menu-fundamento" data-od-id="menu-fundamento">Fundamento Legal - Municípios</div>
+    </div>
+    <div class="side-item">Gestão Escolar<span class="arrow">›</span></div>
+    <div class="side-item">Vida Escolar<span class="arrow">›</span></div>
+  </aside>
+
+  <main class="main" data-od-id="main">
+
+    <section id="home" class="view" data-od-id="view-home">
+      <div class="home-card">
+        <h1 class="page-title" style="margin-bottom:6px">Bem-vindo(a)</h1>
+        <p>Para começar, use o <b>menu lateral</b>. Abra <b>Municípios</b> e escolha o módulo desejado.</p>
+        <p class="hint">Neste tutorial: cadastrar uma disciplina e vê-la no Fundamento Legal.</p>
+      </div>
+    </section>
+
+    <section id="view-disciplinas" class="view" hidden data-od-id="view-disciplinas">
+    <h1 class="page-title" data-od-id="page-title">Disciplinas - Município</h1>
+
+    <div class="card" data-od-id="form-card">
+      <div class="card-toolbar">
+        <button class="btn" id="btn-cadastrar" data-od-id="btn-cadastrar">
+          <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Cadastrar
+        </button>
+      </div>
+      <div class="form-body">
+        <div class="form-grid">
+          <label class="form-label" for="ano">Ano Letivo:</label>
+          <input class="form-input" id="ano" value="2026" disabled title="Bloqueado no ano letivo atual">
+          <label class="form-label" for="rede">Rede de Ensino:</label>
+          <input class="form-input" id="rede" value="MUNICIPAL" disabled title="Bloqueado em Municipal">
+          <label class="form-label" for="select-ure">Diretoria:</label>
+          <select class="form-input" id="select-ure" data-od-id="select-diretoria">
+            <option value="SELECIONE...">SELECIONE...</option>
+            <option>P.M. DE ADAMANTINA</option>
+            <option>P.M. DE CAMPINAS</option>
+            <option>P.M. DE SANTOS</option>
+            <option>P.M. DE RIBEIRÃO PRETO</option>
+            <option>D.R.E. BUTANTÃ</option>
+            <option>D.R.E. CAMPO LIMPO</option>
+            <option>D.R.E. IPIRANGA</option>
+            <option>D.R.E. SANTO AMARO</option>
+          </select>
+        </div>
+      </div>
+      <div class="aviso" id="aviso" role="alert" hidden></div>
+      <div class="form-actions">
+        <button class="btn" id="btn-pesquisar" data-od-id="btn-pesquisar">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Pesquisar
+        </button>
+      </div>
+    </div>
+
+    <div class="card" data-od-id="table-card">
+      <div class="table-toolbar">
+        <div class="mini"><span>Mostrar</span><input value="10" readonly><span>registros</span></div>
+        <div class="spacer"></div>
+        <button class="btn btn-outline" type="button">Escolher Colunas</button>
+        <button class="btn btn-outline" type="button">Imprimir</button>
+        <button class="btn btn-outline" type="button">Gerar Excel</button>
+        <button class="btn btn-outline" type="button">Gerar PDF</button>
+        <div class="table-filter"><span>Filtro</span><input type="text" id="filtro" placeholder=""></div>
+      </div>
+      <div class="table-wrapper">
+        <div class="table-header" data-od-id="table-header">
+          <div class="cell">ID</div>
+          <div class="cell">Disciplina</div>
+          <div class="cell">Equivalência do censo</div>
+          <div class="cell">Diretoria</div>
+          <div class="cell">Início da vigência</div>
+          <div class="cell">Fim da vigência</div>
+          <div class="cell">Cadastro</div>
+          <div class="cell">Editar</div>
+          <div class="cell">Excluir</div>
+        </div>
+        <div class="table-body" id="tbody" data-od-id="table-body"></div>
+      </div>
+      <div class="table-footer">
+        <span id="status" data-od-id="status-registros">Nenhum registro</span>
+        <div class="pagination"><a href="#">Anterior</a><span class="on">1</span><a href="#">Seguinte</a></div>
+      </div>
+    </div>
+    </section>
+
+    <section id="view-fundamento" class="view" hidden data-od-id="view-fundamento">
+      <h1 class="page-title" data-od-id="page-title-fundamento">Fundamento Legal</h1>
+
+      <div class="card" data-od-id="form-card-fundamento">
+        <div class="card-toolbar">
+          <button class="btn" id="btn-cadastrar-fund" type="button" data-od-id="btn-cadastrar-fund">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Cadastrar
+          </button>
+        </div>
+        <div class="form-body">
+          <div class="form-grid fund-filters">
+            <label class="form-label" for="fund-ano">Ano Letivo:</label>
+            <input class="form-input" id="fund-ano" value="2026" disabled title="Bloqueado no ano letivo atual">
+            <label class="form-label" for="fund-rede">Rede de Ensino:</label>
+            <input class="form-input" id="fund-rede" value="MUNICIPAL" disabled title="Bloqueado em Municipal">
+            <label class="form-label" for="fund-diretoria">Diretoria:</label>
+            <select class="form-input" id="fund-diretoria" data-od-id="fund-diretoria"></select>
+            <label class="form-label" for="fund-tipo-ensino">Tipo de Ensino:</label>
+            <select class="form-input" id="fund-tipo-ensino">
+              <option value="">SELECIONE</option>
+              <option>ENSINO INFANTIL</option>
+              <option>14 - ENSINO FUNDAMENTAL DE 9 ANOS</option>
+              <option>20 - ENSINO MÉDIO</option>
+              <option>25 - EDUCAÇÃO DE JOVENS E ADULTOS</option>
+            </select>
+            <label class="form-label" for="fund-anos">Anos:</label>
+            <select class="form-input" id="fund-anos">
+              <option value="">SELECIONE</option>
+              <option>ANOS INICIAIS</option>
+              <option>ANOS FINAIS</option>
+            </select>
+            <label class="form-label" for="fund-status">Status:</label>
+            <select class="form-input" id="fund-status">
+              <option value="">SELECIONE</option>
+              <option>ATIVOS</option>
+              <option>INATIVOS</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn" id="btn-pesquisar-fund" type="button" data-od-id="btn-pesquisar-fund">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Pesquisar
+          </button>
+          <button class="btn btn-outline" id="btn-limpar-fund" type="button" data-od-id="btn-limpar-fund">Limpar</button>
+        </div>
+      </div>
+
+      <div class="card" data-od-id="table-card-fundamento">
+        <div class="table-toolbar">
+          <div class="mini"><span>Mostrar</span><input value="10" readonly><span>registros</span></div>
+          <div class="spacer"></div>
+          <button class="btn btn-outline" type="button">Escolher Colunas</button>
+          <button class="btn btn-outline" type="button">Imprimir</button>
+          <button class="btn btn-outline" type="button">Gerar Excel</button>
+          <button class="btn btn-outline" type="button">Gerar PDF</button>
+          <div class="table-filter"><span>Filtro</span><input type="text" placeholder=""></div>
+        </div>
+        <div class="table-wrapper">
+          <div class="table-header" id="fund-table-header" data-od-id="fund-table-header">
+            <div class="cell">Ano Letivo</div>
+            <div class="cell">Fundamento Legal</div>
+            <div class="cell">Ident. Escola</div>
+            <div class="cell">Tipo de Ensino</div>
+            <div class="cell">Tipo Classe</div>
+            <div class="cell">Habilitação</div>
+            <div class="cell">Deficiência</div>
+            <div class="cell">Turno</div>
+            <div class="cell">Editar</div>
+            <div class="cell">Detalhar</div>
+            <div class="cell">Imprimir</div>
+            <div class="cell">Status</div>
+            <div class="cell">Excluir</div>
+          </div>
+          <div class="table-body" id="fund-tbody" data-od-id="fund-tbody">
+            <div class="row fund-row" id="fund-row-1">
+              <div class="cell-data">2026</div>
+              <div class="cell-data name" title="FUNDAMENTAL ANOS INICIAIS">FUNDAMENTAL ANOS INICIAIS</div>
+              <div class="cell-data">—</div>
+              <div class="cell-data" title="14 - ENSINO FUNDAMENTAL DE 9 ANOS">14 - ENSINO FUNDAMENTAL DE 9 ANOS</div>
+              <div class="cell-data">Padrão</div>
+              <div class="cell-data">—</div>
+              <div class="cell-data">—</div>
+              <div class="cell-data">Diurno</div>
+              <div class="cell-link"><button type="button" id="fund-editar" data-od-id="fund-editar" title="Editar"><svg viewBox="0 0 24 24"><path d="M4 20h4l10-10a2.8 2.8 0 0 0-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg></button></div>
+              <div class="cell-link"><button type="button" title="Detalhar"><svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+              <div class="cell-link"><button type="button" title="Imprimir"><svg viewBox="0 0 24 24"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7"/></svg></button></div>
+              <div class="cell-data"><span class="status-pill">ATIVO</span></div>
+              <div class="cell-link"><button type="button" title="Excluir"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/><path d="M10 11v5M14 11v5"/></svg></button></div>
+            </div>
+          </div>
+        </div>
+        <div class="table-footer">
+          <span>Registros 1 a 1 de 1</span>
+          <div class="pagination"><a href="#">Anterior</a><span class="on">1</span><a href="#">Seguinte</a></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<footer class="gov-footer" data-od-id="gov-footer">
+  <img src="figma/assets/a51c4358b554e6876fe81a1bdb5a91b41b9ad098.png" alt="Brasão do Estado de São Paulo" onerror="this.style.display='none'">
+  <div><b>Governo do Estado de São Paulo</b><br>Secretaria da Educação do Estado de São Paulo</div>
+</footer>
+
+<!-- modal -->
+<div class="modal-overlay" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" data-od-id="modal-disciplina">
+  <div class="modal">
+    <div class="modal-header" id="modal-title" data-od-id="modal-title">CADASTRO DE DISCIPLINA</div>
+    <div class="modal-body">
+      <fieldset>
+        <legend>Dados da Disciplina</legend>
+        <div class="modal-grid">
+          <label class="modal-label" for="cad-nome">Nome:</label>
+          <input class="modal-input" id="cad-nome" data-od-id="input-nome" placeholder="Informe o nome da disciplina">
+          <label class="modal-label" for="cad-id">ID:</label>
+          <input class="modal-input" id="cad-id" disabled title="ID gerado automaticamente">
+          <label class="modal-label" for="cad-censo">Equivalência do censo:</label>
+          <select class="modal-input" id="cad-censo" data-od-id="select-censo">
+            <option>Outras Disciplinas</option>
+          </select>
+          <label class="modal-label" for="cad-ini">Ano início da vigência:</label>
+          <input class="modal-input" id="cad-ini" value="2026" disabled>
+          <label class="modal-label" for="cad-fim">Ano fim da vigência:</label>
+          <input class="modal-input" id="cad-fim" value="2026" disabled>
+        </div>
+      </fieldset>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-fechar" id="btn-fechar-modal" type="button">Fechar</button>
+      <button class="btn" id="btn-salvar-disciplina" data-od-id="btn-salvar-disciplina">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- modal do fundamento (matriz curricular) -->
+<div class="modal-overlay" id="modal-fund" role="dialog" aria-modal="true" aria-labelledby="modal-fund-title">
+  <div class="modal modal-fund">
+    <div class="modal-header" id="modal-fund-title">EDITAR FUNDAMENTO LEGAL</div>
+    <div class="modal-body">
+      <fieldset>
+        <legend>Matriz Curricular — Fundamental Anos Iniciais</legend>
+        <div class="matriz-wrap">
+          <table class="matriz" data-od-id="matriz">
+            <thead>
+              <tr>
+                <th rowspan="2" style="width:24%">Componente Curricular</th>
+                <th rowspan="2" style="width:16%">Equivalente do Censo</th>
+                <th rowspan="2" style="width:12%">Classificação</th>
+                <th colspan="3">1º Ano</th>
+                <th colspan="3">2º Ano</th>
+                <th colspan="3">3º Ano</th>
+                <th colspan="3">4º Ano</th>
+                <th colspan="3">5º Ano</th>
+                <th rowspan="2" style="width:34px"></th>
+              </tr>
+              <tr>
+                <th>Mín</th><th>Máx</th><th>Padrão</th>
+                <th>Mín</th><th>Máx</th><th>Padrão</th>
+                <th>Mín</th><th>Máx</th><th>Padrão</th>
+                <th>Mín</th><th>Máx</th><th>Padrão</th>
+                <th>Mín</th><th>Máx</th><th>Padrão</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><select class="matriz-select" id="fund-componente" data-od-id="fund-componente"><option value="">Selecione...</option></select></td>
+                <td><select class="matriz-select" id="fund-equiv" data-od-id="fund-equiv"><option value="">Selecione...</option><option>Outras Disciplinas</option></select></td>
+                <td><select class="matriz-select"><option>Padrão</option><option>Diversificada</option></select></td>
+                <td><input class="matriz-input" type="number" value="0" min="0"></td>
+                <td><input class="matriz-input" type="number" value="0" min="0"></td>
+                <td><input class="matriz-input" type="number" value="10" min="0"></td>
+                <td><input class="matriz-input" type="number" value="0" min="0"></td>
+                <td><input class="matriz-input" type="number" value="0" min="0"></td>
+                <td><input class="matriz-input" type="number" value="10" min="0"></td>
+                <td><input class="matriz-input" type="number" value="0" min="0"></td>
+                <td><input class="matriz-input" type="number" value="0" min="0"></td>
+                <td><input class="matriz-input" type="number" value="10" min="0"></td>
+                <td><input class="matriz-input" type="number" value="0" min="0"></td>
+                <td><input class="matriz-input" type="number" value="0" min="0"></td>
+                <td><input class="matriz-input" type="number" value="10" min="0"></td>
+                <td><input class="matriz-input" type="number" value="0" min="0"></td>
+                <td><input class="matriz-input" type="number" value="0" min="0"></td>
+                <td><input class="matriz-input" type="number" value="10" min="0"></td>
+                <td><span class="matriz-plus">+</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </fieldset>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" id="btn-fechar-fund" type="button">Fechar</button>
+      <button class="btn" id="btn-salvar-fund" type="button">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- tutorial -->
+<div class="tour" id="tour" aria-hidden="true">
+  <div class="spot" id="spot"></div>
+  <div class="ring" id="ring"></div>
+  <div class="coach" id="coach" role="dialog" aria-live="polite" aria-label="Tutorial guiado">
+    <div class="coach-top">
+      <span class="coach-step" id="coach-step">Passo 1 de 8</span>
+      <button class="tour-x" id="tour-exit" type="button">Sair do tutorial</button>
+    </div>
+    <div class="pbar"><i id="pbar"></i></div>
+    <h2 id="coach-title"></h2>
+    <p id="coach-text"></p>
+    <p class="wait" id="coach-wait" hidden></p>
+    <div class="coach-actions">
+      <button class="btn-link link" id="btn-skip" type="button">Pular etapa</button>
+      <button class="btn-primary" id="btn-continue" type="button">Continuar</button>
+    </div>
+  </div>
+</div>
+<button class="restart" id="restart" type="button" hidden>▸ Refazer tutorial</button>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------- dados ---------------- */
+  var PADRAO = [
+    {id:1100, nome:"LÍNGUA PORTUGUESA"},
+    {id:1200, nome:"LÍNGUA ESTRANGEIRA ESPANHOL"},
+    {id:1813, nome:"ARTE"},
+    {id:1900, nome:"EDUCAÇÃO FÍSICA"},
+    {id:2100, nome:"GEOGRAFIA"},
+    {id:2200, nome:"HISTÓRIA"},
+    {id:2700, nome:"MATEMÁTICA"},
+    {id:3100, nome:"FILOSOFIA"}
+  ];
+  var rows = [];
+  var cadastradas = [];
+  var editId = null;
+
+  var selUre = document.getElementById("select-ure");
+  var btnPesq = document.getElementById("btn-pesquisar");
+  var btnCad = document.getElementById("btn-cadastrar");
+  var aviso = document.getElementById("aviso");
+  var tbody = document.getElementById("tbody");
+  var statusEl = document.getElementById("status");
+  var modal = document.getElementById("modal");
+  var cadNome = document.getElementById("cad-nome");
+  var cadId = document.getElementById("cad-id");
+  var cadCenso = document.getElementById("cad-censo");
+  var btnSalvar = document.getElementById("btn-salvar-disciplina");
+  var filtro = document.getElementById("filtro");
+  var home = document.getElementById("home");
+  var viewDisc = document.getElementById("view-disciplinas");
+  var viewFund = document.getElementById("view-fundamento");
+  var menuMunicipios = document.getElementById("menu-municipios");
+  var menuDisciplinas = document.getElementById("menu-disciplinas");
+  var menuFundamento = document.getElementById("menu-fundamento");
+  var submenu = document.getElementById("submenu-municipios");
+  var fundComponente = document.getElementById("fund-componente");
+  var fundEquiv = document.getElementById("fund-equiv");
+  var modalFund = document.getElementById("modal-fund");
+  var fundEditar = document.getElementById("fund-editar");
+  var novaDisciplinaId = null;
+
+  function hoje(){
+    var d = new Date();
+    var dd = String(d.getDate()).padStart(2,"0");
+    var mm = String(d.getMonth()+1).padStart(2,"0");
+    return dd+"/"+mm+"/"+d.getFullYear();
+  }
+  function nowYear(){ return String(new Date().getFullYear()); }
+  function nextId(){
+    var max = 0;
+    rows.forEach(function(r){ if(r.id > max) max = r.id; });
+    PADRAO.forEach(function(r){ if(r.id > max) max = r.id; });
+    return max + 1;
+  }
+  function mostrarAviso(msg){
+    aviso.textContent = msg;
+    aviso.hidden = false;
+    clearTimeout(mostrarAviso.t);
+    mostrarAviso.t = setTimeout(function(){ aviso.hidden = true; }, 4200);
+  }
+  function limparAviso(){ aviso.hidden = true; }
+
+  function svgEditar(){
+    return '<svg viewBox="0 0 24 24"><path d="M4 20h4l10-10a2.8 2.8 0 0 0-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>';
+  }
+  function svgExcluir(){
+    return '<svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/><path d="M10 11v5M14 11v5"/></svg>';
+  }
+
+  function render(){
+    var termo = (filtro.value||"").trim().toLowerCase();
+    var visiveis = rows.filter(function(r){
+      return !termo || r.nome.toLowerCase().indexOf(termo) > -1;
+    });
+    if(!rows.length){
+      tbody.innerHTML = '<div class="empty">Nenhum registro encontrado! Selecione uma diretoria e clique em Pesquisar.</div>';
+      statusEl.textContent = "Nenhum registro";
+      return;
+    }
+    if(!visiveis.length){
+      tbody.innerHTML = '<div class="empty">Nenhum registro encontrado para o filtro informado.</div>';
+      statusEl.textContent = "Nenhum registro";
+      return;
+    }
+    tbody.innerHTML = visiveis.map(function(r){
+      return '<div class="row" data-id="'+r.id+'">'
+        + '<div class="cell-data">'+r.id+'</div>'
+        + '<div class="cell-data name" title="'+r.nome+'">'+r.nome+'</div>'
+        + '<div class="cell-data">'+r.censo+'</div>'
+        + '<div class="cell-data">'+r.dir+'</div>'
+        + '<div class="cell-data">'+r.ini+'</div>'
+        + '<div class="cell-data">'+r.fim+'</div>'
+        + '<div class="cell-data">'+r.data+'</div>'
+        + '<div class="cell-link"><button type="button" data-edit="'+r.id+'" title="Editar">'+svgEditar()+'</button></div>'
+        + '<div class="cell-link"><button type="button" data-del="'+r.id+'" title="Excluir">'+svgExcluir()+'</button></div>'
+        + '</div>';
+    }).join("");
+    statusEl.textContent = "Registros 1 a " + visiveis.length + " de " + visiveis.length;
+  }
+
+  function pesquisar(){
+    if(selUre.value === "SELECIONE..."){
+      mostrarAviso("Selecione uma diretoria para pesquisar.");
+      selUre.focus();
+      return false;
+    }
+    limparAviso();
+    rows = PADRAO.map(function(p){
+      return {id:p.id, nome:p.nome, censo:"", dir:"TODAS", ini:nowYear(), fim:nowYear(), data:hoje()};
+    });
+    cadastradas.forEach(function(c){
+      if(c.dir === selUre.value || c.dir === "TODAS") rows.push(c);
+    });
+    render();
+    document.dispatchEvent(new CustomEvent("app:searched"));
+    return true;
+  }
+
+  function abrirModal(mode, row){
+    if(mode === "new" && selUre.value === "SELECIONE..."){
+      mostrarAviso("Selecione uma diretoria para cadastrar.");
+      selUre.focus();
+      return false;
+    }
+    limparAviso();
+    editId = mode === "edit" ? row.id : null;
+    document.getElementById("modal-title").textContent = editId ? "EDITAR DISCIPLINA" : "CADASTRO DE DISCIPLINA";
+    cadId.value = editId || nextId();
+    cadNome.value = row ? row.nome : "";
+    cadNome.classList.remove("erro");
+    cadCenso.value = "Outras Disciplinas";
+    modal.classList.add("open");
+    document.dispatchEvent(new CustomEvent("app:modal-open"));
+    setTimeout(function(){ cadNome.focus(); }, 60);
+    return true;
+  }
+  function fecharModal(){
+    modal.classList.remove("open");
+    cadNome.classList.remove("erro");
+    editId = null;
+  }
+
+  function salvar(){
+    if(active && steps[current] && steps[current].id !== "salvar") return;
+    var nome = cadNome.value.trim();
+    if(!nome){
+      cadNome.classList.add("erro");
+      cadNome.focus();
+      return;
+    }
+    if(editId){
+      rows.forEach(function(r){
+        if(r.id === editId){ r.nome = nome.toUpperCase(); r.censo = cadCenso.value; }
+      });
+      cadastradas.forEach(function(r){
+        if(r.id === editId){ r.nome = nome.toUpperCase(); r.censo = cadCenso.value; }
+      });
+    } else {
+      var nova = {
+        id: Number(cadId.value) || nextId(),
+        nome: nome.toUpperCase(),
+        censo: cadCenso.value,
+        dir: selUre.value,
+        ini: nowYear(),
+        fim: nowYear(),
+        data: hoje()
+      };
+      rows.push(nova);
+      cadastradas.push(nova);
+      novaDisciplinaId = nova.id;
+    }
+    var alvo = editId;
+    fecharModal();
+    render();
+    if(alvo){
+      var el = tbody.querySelector('[data-id="'+alvo+'"]');
+      if(el) el.classList.add("novo");
+    } else {
+      var ult = tbody.querySelector(".row:last-child");
+      if(ult) ult.classList.add("novo");
+    }
+    document.dispatchEvent(new CustomEvent("app:saved"));
+  }
+
+  function setView(name){
+    home.hidden = name !== "home";
+    viewDisc.hidden = name !== "disciplinas";
+    viewFund.hidden = name !== "fundamento";
+    menuDisciplinas.classList.toggle("active", name === "disciplinas");
+    menuFundamento.classList.toggle("active", name === "fundamento");
+  }
+  function abrirDisciplinas(){ setView("disciplinas"); }
+  function montarComponentes(){
+    var opts = '<option value="">Selecione...</option>';
+    PADRAO.forEach(function(p){
+      opts += '<option value="'+p.id+'">'+p.id+' - '+p.nome+'</option>';
+    });
+    cadastradas.forEach(function(c){
+      opts += '<option value="'+c.id+'" data-equiv="'+String(c.censo).replace(/"/g,"&quot;")+'">'+c.id+' - '+c.nome+'</option>';
+    });
+    fundComponente.innerHTML = opts;
+    fundEquiv.value = "";
+  }
+  function abrirFundamento(){
+    var fd = document.getElementById("fund-diretoria");
+    fd.innerHTML = selUre.innerHTML;
+    fd.value = selUre.value;
+    setView("fundamento");
+  }
+  function abrirMatrizFund(){
+    montarComponentes();
+    modalFund.classList.add("open");
+  }
+
+  /* ---------------- eventos da tela ---------------- */
+  btnPesq.addEventListener("click", pesquisar);
+  btnCad.addEventListener("click", function(){ abrirModal("new"); });
+  btnSalvar.addEventListener("click", salvar);
+  document.getElementById("btn-fechar-modal").addEventListener("click", fecharModal);
+  cadNome.addEventListener("keydown", function(e){ if(e.key === "Enter") salvar(); });
+  selUre.addEventListener("change", limparAviso);
+  filtro.addEventListener("input", function(){ if(rows.length) render(); });
+
+  tbody.addEventListener("click", function(e){
+    var ed = e.target.closest("[data-edit]");
+    var dl = e.target.closest("[data-del]");
+    if(ed){
+      var id = Number(ed.getAttribute("data-edit"));
+      var row = rows.filter(function(r){ return r.id === id; })[0];
+      if(row) abrirModal("edit", row);
+    }
+    if(dl){
+      var id2 = Number(dl.getAttribute("data-del"));
+      rows = rows.filter(function(r){ return r.id !== id2; });
+      cadastradas = cadastradas.filter(function(r){ return r.id !== id2; });
+      render();
+    }
+  });
+
+  /* ---------------- tutorial ---------------- */
+  var steps = [
+    { id:"intro", target:null, cta:"Começar",
+      title:"Vamos começar pelo menu",
+      text:"Este tutorial acompanha você na tela de verdade. Primeiro, vamos aprender qual caminho do menu abre o cadastro de disciplinas." },
+    { id:"menu-municipios", target:"#menu-municipios", action:true,
+      title:"1. Abra o menu Municípios",
+      text:"No menu lateral, clique em “Municípios” para abrir os módulos municipais.",
+      wait:"Clique em “Municípios” no menu lateral." },
+    { id:"menu-disciplinas", target:"#menu-disciplinas", action:true,
+      title:"2. Clique em Disciplinas - Municípios",
+      text:"É esse o caminho da tela: Municípios › Disciplinas - Municípios.",
+      wait:"Clique em “Disciplinas - Municípios”." },
+    { id:"diretoria", target:"#select-ure", action:true,
+      title:"3. Escolha a Diretoria",
+      text:"A tela é por município. Selecione uma diretoria para trabalhar. O Ano Letivo (2026) e a Rede (MUNICIPAL) já vêm preenchidos e bloqueados.",
+      wait:"Selecione uma diretoria para continuar." },
+    { id:"pesquisar", target:"#btn-pesquisar", action:true,
+      title:"4. Clique em Pesquisar",
+      text:"A pesquisa mostra as disciplinas padrão, válidas para todos (Diretoria = TODAS), junto com as disciplinas próprias do município selecionado.",
+      wait:"Clique em Pesquisar." },
+    { id:"cadastrar", target:"#btn-cadastrar", action:true,
+      title:"5. Clique em Cadastrar",
+      text:"Vamos criar uma disciplina nova. O código (ID) é gerado automaticamente e não se repete.",
+      wait:"Clique em Cadastrar." },
+    { id:"nome", target:"#cad-nome", action:true,
+      title:"6. Digite o nome",
+      text:"O nome é obrigatório. As vigências já vêm com o ano atual (2026) e não são editáveis.",
+      wait:"Digite o nome da disciplina." },
+    { id:"censo", target:"#cad-censo", cta:"Continuar",
+      title:"Equivalência do censo",
+      text:"Aqui só existe a opção “Outras Disciplinas”. É essa equivalência que vai preencher a coluna “Equivalente do Censo” no Fundamento Legal." },
+    { id:"salvar", target:"#btn-salvar-disciplina", action:true,
+      title:"7. Clique em Salvar",
+      text:"A disciplina entra na listagem do município. Agora vamos até o Fundamento Legal ver onde ela aparece.",
+      wait:"Clique em Salvar para concluir o cadastro." },
+    { id:"ir-fundamento", target:"#menu-fundamento", action:true,
+      title:"8. Abra o Fundamento Legal",
+      text:"No mesmo menu, clique em “Fundamento Legal - Municípios”. É aqui que a disciplina vira componente curricular.",
+      wait:"Clique em “Fundamento Legal - Municípios”." },
+    { id:"editar-fundamento", target:"#fund-editar", action:true,
+      title:"9. Edite o fundamento",
+      text:"Na listagem do Fundamento Legal, clique no lápis (Editar) da linha. A Matriz Curricular é onde as disciplinas entram.",
+      wait:"Clique no ícone de lápis (Editar)." },
+    { id:"componente", target:"#fund-componente", action:true,
+      title:"10. Escolha a disciplina",
+      text:"Na Matriz Curricular, abra “Componente Curricular”. A disciplina que você cadastrou aparece na lista, com o código na frente.",
+      wait:"Selecione a disciplina que você acabou de cadastrar (a última da lista)." },
+    { id:"equivalencia", target:"#fund-equiv", cta:"Concluir",
+      title:"Equivalente do Censo",
+      text:"Repare: a equivalência veio automaticamente da tela de Disciplinas. É por isso que o município cadastra a disciplina com “Outras Disciplinas”." },
+    { id:"fim", target:null, cta:"Explorar a tela",
+      title:"Tudo certo!",
+      text:"Você aprendeu o caminho completo: Municípios › Disciplinas - Municípios, cadastrou uma disciplina e viu essa disciplina virar Componente Curricular no Fundamento Legal, com a equivalência preenchida." }
+  ];
+
+  var tour = document.getElementById("tour");
+  var spot = document.getElementById("spot");
+  var ring = document.getElementById("ring");
+  var coach = document.getElementById("coach");
+  var coachStep = document.getElementById("coach-step");
+  var coachTitle = document.getElementById("coach-title");
+  var coachText = document.getElementById("coach-text");
+  var coachWait = document.getElementById("coach-wait");
+  var pbar = document.getElementById("pbar");
+  var btnCont = document.getElementById("btn-continue");
+  var btnSkip = document.getElementById("btn-skip");
+  var btnExit = document.getElementById("tour-exit");
+  var restart = document.getElementById("restart");
+  var sidebarEl = document.getElementById("sidebar");
+  var btnMenu = document.getElementById("btn-menu");
+  var drawerBg = document.getElementById("drawer-bg");
+  var current = 0;
+  var active = false;
+  var advancing = false;
+
+  function ehMobile(){ return window.innerWidth <= 920; }
+  function abrirMenu(){
+    sidebarEl.classList.add("open");
+    drawerBg.classList.add("show");
+    btnMenu.setAttribute("aria-expanded","true");
+  }
+  function fecharMenu(){
+    sidebarEl.classList.remove("open");
+    drawerBg.classList.remove("show");
+    btnMenu.setAttribute("aria-expanded","false");
+  }
+
+  function posicionarCoach(el){
+    var cw = coach.offsetWidth || 366;
+    var ch = coach.offsetHeight || 220;
+    if(!el){
+      coach.style.left = "50%";
+      coach.style.top = "50%";
+      coach.style.right = "auto";
+      coach.style.bottom = "auto";
+      coach.style.width = "366px";
+      coach.style.transform = "translate(-50%,-50%)";
+      return;
+    }
+    var r = el.getBoundingClientRect();
+    if(window.innerWidth <= 620){
+      var paraBaixo = (r.top + r.height/2) > (window.innerHeight/2);
+      coach.style.left = "12px";
+      coach.style.right = "12px";
+      coach.style.width = "auto";
+      coach.style.transform = "none";
+      if(paraBaixo){ coach.style.top = "12px"; coach.style.bottom = "auto"; }
+      else { coach.style.top = "auto"; coach.style.bottom = "12px"; }
+      return;
+    }
+    coach.style.transform = "none";
+    coach.style.right = "auto";
+    coach.style.bottom = "auto";
+    coach.style.width = "366px";
+    var cx = r.left + r.width/2 - cw/2;
+    var cy = r.bottom + 14;
+    if(cy + ch > window.innerHeight - 12) cy = r.top - ch - 14;
+    if(cy < 12) cy = 12;
+    cx = Math.max(12, Math.min(cx, window.innerWidth - cw - 12));
+    coach.style.left = cx + "px";
+    coach.style.top = cy + "px";
+  }
+
+  function layout(){
+    if(!active) return;
+    var s = steps[current];
+    if(!s || !s.target){ spot.style.display = "none"; ring.style.display = "none"; posicionarCoach(null); return; }
+    var el = document.querySelector(s.target);
+    if(!el){ spot.style.display = "none"; ring.style.display = "none"; posicionarCoach(null); return; }
+    var r = el.getBoundingClientRect();
+    if(r.width === 0 && r.height === 0){ spot.style.display = "none"; ring.style.display = "none"; posicionarCoach(null); return; }
+    var pad = 6;
+    var box = { top:(r.top-pad)+"px", left:(r.left-pad)+"px", width:(r.width+pad*2)+"px", height:(r.height+pad*2)+"px" };
+    spot.style.display = "block"; ring.style.display = "block";
+    spot.style.top = box.top; spot.style.left = box.left; spot.style.width = box.width; spot.style.height = box.height;
+    ring.style.top = box.top; ring.style.left = box.left; ring.style.width = box.width; ring.style.height = box.height;
+    posicionarCoach(el);
+  }
+
+  function revelarEditar(){
+    var w = document.querySelector("#view-fundamento .table-wrapper");
+    var el = document.getElementById("fund-editar");
+    if(!w || !el || !ehMobile()) return;
+    var wr = w.getBoundingClientRect();
+    var er = el.getBoundingClientRect();
+    w.scrollLeft += (er.left - wr.left) - (w.clientWidth/2 - er.width/2);
+    setTimeout(layout, 40);
+  }
+
+  function renderStep(){
+    var s = steps[current];
+    if(!s) return;
+    coach.classList.remove("is-done");
+    coachStep.textContent = "Passo " + (current+1) + " de " + steps.length;
+    coachTitle.textContent = s.title;
+    coachText.textContent = s.text;
+    pbar.style.width = (((current+1)/steps.length)*100) + "%";
+    tour.classList.toggle("center", !s.target);
+    if(s.action){
+      coachWait.hidden = false;
+      coachWait.textContent = s.wait || "Faça a ação para continuar.";
+      btnCont.hidden = true;
+      btnSkip.hidden = false;
+    } else {
+      coachWait.hidden = true;
+      btnCont.hidden = false;
+      btnCont.textContent = s.cta || "Continuar";
+      btnSkip.hidden = true;
+    }
+    btnExit.textContent = (s.id === "fim") ? "Fechar" : "Sair do tutorial";
+    var menuStep = (s.id === "menu-municipios" || s.id === "menu-disciplinas" || s.id === "ir-fundamento");
+    if(ehMobile()){
+      if(menuStep) abrirMenu(); else fecharMenu();
+    }
+    requestAnimationFrame(layout);
+    setTimeout(layout, 60);
+    if(ehMobile() && menuStep) setTimeout(layout, 300);
+    if(s.id === "editar-fundamento") setTimeout(revelarEditar, 220);
+  }
+
+  function go(i){
+    if(i < 0) i = 0;
+    if(i >= steps.length){ fim(); return; }
+    current = i;
+    advancing = false;
+    renderStep();
+  }
+
+  function complete(){
+    if(!active || advancing) return;
+    var at = current;
+    var s = steps[at];
+    if(!s || !s.action) return;
+    advancing = true;
+    coach.classList.add("is-done");
+    coachWait.textContent = "✓ Feito!";
+    setTimeout(function(){
+      if(!active || current !== at) { advancing = false; return; }
+      advancing = false;
+      go(at + 1);
+    }, 620);
+  }
+
+  function iniciar(){
+    active = true;
+    current = 0;
+    advancing = false;
+    document.body.classList.add("tour-on");
+    tour.style.display = "block";
+    tour.setAttribute("aria-hidden","false");
+    restart.hidden = true;
+    modal.classList.remove("open");
+    modalFund.classList.remove("open");
+    submenu.classList.remove("open");
+    setView("home");
+    rows = [];
+    cadastradas = [];
+    novaDisciplinaId = null;
+    selUre.value = "SELECIONE...";
+    filtro.value = "";
+    render();
+    renderStep();
+  }
+  function fim(){
+    active = false;
+    document.body.classList.remove("tour-on");
+    tour.style.display = "none";
+    tour.setAttribute("aria-hidden","true");
+    modalFund.classList.remove("open");
+    restart.hidden = false;
+  }
+
+  btnCont.addEventListener("click", function(){
+    var s = steps[current];
+    if(s && s.id === "fim"){ fim(); return; }
+    go(current + 1);
+  });
+  btnSkip.addEventListener("click", function(){
+    if(!active) return;
+    var s = steps[current];
+    if(s && s.id === "menu-municipios") submenu.classList.add("open");
+    if(s && s.id === "menu-disciplinas") abrirDisciplinas();
+    if(s && s.id === "ir-fundamento") abrirFundamento();
+    if(s && s.id === "editar-fundamento") abrirMatrizFund();
+    go(current + 1);
+  });
+  btnExit.addEventListener("click", fim);
+  restart.addEventListener("click", iniciar);
+  btnMenu.addEventListener("click", function(){
+    if(sidebarEl.classList.contains("open")) fecharMenu(); else abrirMenu();
+  });
+  drawerBg.addEventListener("click", fecharMenu);
+
+  /* gatilhos de ação */
+  selUre.addEventListener("change", function(){
+    if(active && steps[current] && steps[current].id === "diretoria" && selUre.value !== "SELECIONE...") complete();
+  });
+  document.addEventListener("app:searched", function(){
+    if(active && steps[current] && steps[current].id === "pesquisar") complete();
+  });
+  document.addEventListener("app:modal-open", function(){
+    if(active && steps[current] && steps[current].id === "cadastrar") complete();
+  });
+  document.addEventListener("app:saved", function(){
+    if(active && steps[current] && steps[current].id === "salvar") complete();
+  });
+
+  function navPermitida(stepId){
+    return !active || (steps[current] && steps[current].id === stepId);
+  }
+  menuMunicipios.addEventListener("click", function(){
+    if(!navPermitida("menu-municipios")) return;
+    if(active && steps[current] && steps[current].id === "menu-municipios"){
+      submenu.classList.add("open");
+      complete();
+    } else {
+      submenu.classList.toggle("open");
+    }
+  });
+  menuDisciplinas.addEventListener("click", function(){
+    if(!navPermitida("menu-disciplinas")) return;
+    abrirDisciplinas();
+    if(ehMobile()) fecharMenu();
+    if(active && steps[current] && steps[current].id === "menu-disciplinas") complete();
+  });
+  menuFundamento.addEventListener("click", function(){
+    if(!navPermitida("ir-fundamento")) return;
+    abrirFundamento();
+    if(ehMobile()) fecharMenu();
+    if(active && steps[current] && steps[current].id === "ir-fundamento") complete();
+  });
+  fundComponente.addEventListener("change", function(){
+    var opt = fundComponente.options[fundComponente.selectedIndex];
+    var eq = opt ? (opt.getAttribute("data-equiv") || "") : "";
+    fundEquiv.value = eq || "";
+    if(!(active && steps[current] && steps[current].id === "componente")) return;
+    if(!fundComponente.value) return;
+    if(novaDisciplinaId && String(novaDisciplinaId) !== fundComponente.value) return;
+    complete();
+  });
+  fundEditar.addEventListener("click", function(){
+    if(active && !(steps[current] && steps[current].id === "editar-fundamento")) return;
+    abrirMatrizFund();
+    if(active && steps[current] && steps[current].id === "editar-fundamento") complete();
+  });
+  document.getElementById("btn-cadastrar-fund").addEventListener("click", function(){
+    if(active && !(steps[current] && steps[current].id === "editar-fundamento")) return;
+    abrirMatrizFund();
+  });
+  document.getElementById("btn-fechar-fund").addEventListener("click", function(){ modalFund.classList.remove("open"); });
+  document.getElementById("btn-salvar-fund").addEventListener("click", function(){ modalFund.classList.remove("open"); });
+  var tipoTimer = null;
+  cadNome.addEventListener("input", function(){
+    if(!(active && steps[current] && steps[current].id === "nome")) return;
+    clearTimeout(tipoTimer);
+    if(cadNome.value.trim().length >= 2){
+      tipoTimer = setTimeout(complete, 650);
+    }
+  });
+
+  window.addEventListener("resize", function(){
+    if(!ehMobile()) fecharMenu();
+    layout();
+  });
+  window.addEventListener("scroll", layout, true);
+
+  /* inicialização */
+  render();
+  iniciar();
+})();
+</script>
+</body>
+</html>
